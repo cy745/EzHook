@@ -7,29 +7,19 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.35.0"
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("../local-plugin-repository")
-    }
-    google()
-    gradlePluginPortal()
-}
-
 dependencies {
-    // gradle plugin
     implementation(kotlin("gradle-plugin-api"))
 
     // compiler plugin
     compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-    kapt("com.google.auto.service:auto-service:1.1.1")
-    compileOnly("com.google.auto.service:auto-service-annotations:1.1.1")
+    implementation(kotlin("gradle-plugin", version = "2.0.21"))
 }
+
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
-    coordinates("io.github.dreammooncai", "ez-hook-compiler-plugin", "0.0.4")
+//    signAllPublications()
+    coordinates("io.github.dreammooncai", "ez-hook-gradle-plugin", "0.0.5")
 
     pom {
         name.set("EzHook")
@@ -62,6 +52,17 @@ publishing {
         maven {
             name = "localPluginRepository"
             url = uri("../local-plugin-repository")
+        }
+    }
+}
+
+gradlePlugin {
+    plugins {
+        create("EzHookPlugin") {
+            id = "io.github.dreammooncai.ez-hook-gradle-plugin"
+            displayName = "EzHook Compiler Plugin"
+            description = "EzHook Compiler Plugin"
+            implementationClass = "com.wulinpeng.ezhook.EzHookGradlePlugin"
         }
     }
 }

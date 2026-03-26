@@ -27,7 +27,7 @@ interface IrLoweringHookExtension {
 
         fun runHook(traverser: (CommonBackendContext, IrModuleFragment) -> Unit,
                     transformer: (CommonBackendContext, IrModuleFragment) -> Unit) {
-            NativeIrLoweringHook.runHook(traverser, transformer)
+//            NativeIrLoweringHook.runHook(traverser, transformer)
             JsIrLoweringHook.runHook(traverser, transformer)
         }
 

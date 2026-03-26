@@ -2,23 +2,16 @@ package com.wulinpeng.ezhook
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
-import org.gradle.internal.configuration.problems.taskPathFrom
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
-import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
-import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
-import org.jetbrains.kotlin.konan.file.File
-import org.jetbrains.kotlin.library.ToolingSingleFileKlibResolveStrategy
-import org.jetbrains.kotlin.util.Logger
-import kotlin.Nothing
+import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
-class EzHookGradlePlugin: KotlinCompilerPluginSupportPlugin {
+class EzHookGradlePlugin : KotlinCompilerPluginSupportPlugin {
 
     private lateinit var project: Project
 
@@ -49,5 +42,6 @@ class EzHookGradlePlugin: KotlinCompilerPluginSupportPlugin {
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
         return kotlinCompilation.target is KotlinNativeTarget
                 || kotlinCompilation.target is KotlinJsIrTarget
+                || kotlinCompilation.target is KotlinJvmTarget
     }
 }

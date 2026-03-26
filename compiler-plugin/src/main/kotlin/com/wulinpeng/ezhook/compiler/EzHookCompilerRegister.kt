@@ -1,17 +1,14 @@
 package com.wulinpeng.ezhook.compiler
 
-import com.google.auto.service.AutoService
 import com.wulinpeng.ezhook.compiler.hook.IrLoweringHookExtension
-import com.wulinpeng.ezhook.compiler.visitor.EzHookCollectorVisitor
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import java.io.File
 import java.net.JarURLConnection
 
-@AutoService(CompilerPluginRegistrar::class)
 @OptIn(ExperimentalCompilerApi::class)
-class EzHookCompilerRegister: CompilerPluginRegistrar() {
+class EzHookCompilerRegister : CompilerPluginRegistrar() {
     override val pluginId: String
         get() = "ez-hook-gradle-plugin"
     override val supportsK2: Boolean = true
@@ -37,6 +34,7 @@ class EzHookCompilerRegister: CompilerPluginRegistrar() {
                     }
                 }
             }
+
             "jar" -> {
                 val jarPath = (url.openConnection() as JarURLConnection).jarFile
                 for (entry in jarPath.entries()) {

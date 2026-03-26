@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    id("io.github.dreammooncai.ez-hook-gradle-plugin")
 }
 
 kotlin {
@@ -18,6 +16,8 @@ kotlin {
         }
     }
 
+    jvm("desktop")
+
     js(IR) {
         nodejs()
         browser()
@@ -28,5 +28,9 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             // put your Multiplatform dependencies here
         }
+    }
+
+    compilerOptions {
+        verbose.value(true)
     }
 }

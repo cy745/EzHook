@@ -1,17 +1,18 @@
 package com.wulinpeng.ezhook.demov2
 
-abstract class B(text: String){
+abstract class B(text: String) {
     init {
         println("B init $text")
     }
+
     val bValue = "b string"
 
     fun a() = "a"
 }
 
-class NormalTest(name: String): B(name) {
+class NormalTest(name: String) : B(name) {
 
-    constructor(): this("def")
+    constructor() : this("def")
 
     init {
         println("NormalTest init $name")
@@ -42,4 +43,8 @@ fun topLevelFunctionTest(name: String): String {
 
 fun Int.getStr(): String {
     return "Int value: $this"
+}
+
+fun main() {
+    println(9.getStr())
 }

@@ -1,6 +1,9 @@
 package com.wulinpeng.ezhook.compiler.hook
 
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
+import org.jetbrains.kotlin.backend.common.ModuleLoweringPass
+import org.jetbrains.kotlin.backend.common.phaser.LoweringPhase
+import org.jetbrains.kotlin.config.phaser.NamedCompilerPhase
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 
 /**
@@ -12,8 +15,10 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 object JsIrLoweringHook {
     private const val NATIVE_LOWERING_PHASES_CLASS = "org.jetbrains.kotlin.ir.backend.js.JsLoweringPhasesKt"
 
-    fun runHook(traverser: (CommonBackendContext, IrModuleFragment) -> Unit,
-                transformer: (CommonBackendContext, IrModuleFragment) -> Unit) {
+    fun runHook(
+        traverser: (CommonBackendContext, IrModuleFragment) -> Unit,
+        transformer: (CommonBackendContext, IrModuleFragment) -> Unit
+    ) {
         runCatching {
             val allModules = mutableListOf<IrModuleFragment>()
             hookValidateIrBeforeLowering(allModules, traverser)
@@ -25,16 +30,21 @@ object JsIrLoweringHook {
         }
     }
 
-    private fun hookValidateIrBeforeLowering(allModules: MutableList<IrModuleFragment>, transformer: (CommonBackendContext, IrModuleFragment) -> Unit) {
-        hookLoweringPhase("validateIrBeforeLowering") { context, irModuleFragment ->
+    private fun hookValidateIrBeforeLowering(
+        allModules: MutableList<IrModuleFragment>,
+        transformer: (CommonBackendContext, IrModuleFragment) -> Unit
+    ) {
+        hookLoweringPhase("KlibIrValidationBeforeLoweringPhase") { context, irModuleFragment ->
             allModules.add(irModuleFragment)
             transformer(context, irModuleFragment)
         }
     }
 
-    private fun hookJsCodeOutliningPhase(onStart: (context: CommonBackendContext) -> Unit) {
+    private fun hookJsCodeOutliningPhase(
+        onStart: (context: CommonBackendContext) -> Unit
+    ) {
         var hasStart = false
-        hookLoweringPhase("jsCodeOutliningPhase") { context, irModuleFragment ->
+        hookLoweringPhase("JsCodeOutliningLowering") { context, irModuleFragment ->
             if (!hasStart) {
                 onStart(context)
                 hasStart = true
@@ -45,21 +55,39 @@ object JsIrLoweringHook {
     @Suppress("UNCHECKED_CAST")
     private fun hookLoweringPhase(phaseName: String, transformer: (CommonBackendContext, IrModuleFragment) -> Unit) {
         val clazz = Class.forName(NATIVE_LOWERING_PHASES_CLASS)
-        val lower = clazz.declaredFields.firstOrNull { it.name == phaseName }?.apply {
-            isAccessible = true
-        }!!.get(null)
-        val opField = lower.javaClass.declaredFields.firstOrNull { it.name == "\$op" }?.apply {
-            isAccessible = true
-        }!!
-        var originOp = opField.get(lower)
-        if (!originOp.javaClass.name.startsWith("org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt")) {
-            // already hooked
-            return
+
+        val lowerListField = clazz.declaredFields
+            .firstOrNull { it.name == "jsLowerings" }
+            ?.apply { isAccessible = true }!!
+
+        val lowerList = lowerListField
+            .get(null)
+
+        val lower = (lowerList as List<Any>)
+            .firstOrNull { (it as? NamedCompilerPhase<*, *, *>)?.name == phaseName }!!
+
+        val passField = LoweringPhase::class.java
+            .getDeclaredField("createLoweringPass")
+            .apply { isAccessible = true }
+
+        val originPass = passField.get(lower)
+//        if (!originPass.javaClass.name.startsWith("org.jetbrains.kotlin.ir.backend.js.JsLoweringPhasesKt\$jsLowerings\$1")) {
+//            // already hooked
+//            return
+//        }
+
+        val newPass: (CommonBackendContext) -> OverrideLoweringPass = { context: CommonBackendContext ->
+            object : OverrideLoweringPass() {
+                val originPass = (originPass as (CommonBackendContext) -> ModuleLoweringPass).invoke(context)
+                override fun lower(irModule: IrModuleFragment) {
+                    transformer(context, irModule)
+                    this.originPass.lower(irModule)
+                }
+            }
         }
-        opField.set(lower, {context: CommonBackendContext, irModuleFragment: IrModuleFragment ->
-            transformer(context, irModuleFragment)
-            // call origin
-            (originOp as (Any, IrModuleFragment) -> IrModuleFragment).invoke(context, irModuleFragment)
-        })
+
+        passField.set(lower, newPass)
     }
+
+    abstract class OverrideLoweringPass : ModuleLoweringPass
 }

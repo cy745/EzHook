@@ -48,6 +48,10 @@ dependencies {
     testFixturesApi(libs.kotlin.test.framework)
     testFixturesApi(libs.kotlin.compiler)
     testFixturesRuntimeOnly(libs.junit)
+    testFixturesApi(project(":library"))
+
+    // 引入注解相关类
+    annotationsRuntimeClasspath(project(":library"))
 
     // Dependencies required to run the internal test framework.
     testArtifacts(libs.kotlin.stdlib)

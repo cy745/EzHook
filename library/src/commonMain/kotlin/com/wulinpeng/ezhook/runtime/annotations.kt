@@ -38,7 +38,7 @@ package com.wulinpeng.ezhook.runtime
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.BINARY)
-annotation class EzHook(
+public annotation class EzHook(
     val targetFunctionOrProperty: String,
     val inline: Boolean = false,
     val isInitializeProperty: Boolean = true
@@ -64,7 +64,7 @@ annotation class EzHook(
      */
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
     @Retention(AnnotationRetention.BINARY)
-    annotation class Before(
+    public annotation class Before(
         val targetFunctionOrProperty: String,
         val inline: Boolean = false,
         val isInitializeProperty: Boolean = true
@@ -93,7 +93,7 @@ annotation class EzHook(
      */
     @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
     @Retention(AnnotationRetention.BINARY)
-    annotation class After(
+    public annotation class After(
         val targetFunctionOrProperty: String,
         val inline: Boolean = false,
         val isInitializeProperty: Boolean = true
@@ -133,7 +133,7 @@ annotation class EzHook(
         AnnotationTarget.PROPERTY_SETTER
     )
     @Retention(AnnotationRetention.BINARY)
-    annotation class NULL(
+    public annotation class NULL(
         val targetFunctionOrProperty: String,
         val inline: Boolean = false,
         val isInitializeProperty: Boolean = true

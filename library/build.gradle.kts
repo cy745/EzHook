@@ -1,17 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("../local-plugin-repository")
-    }
-    google()
-    gradlePluginPortal()
-}
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
     `maven-publish`
     id("com.vanniktech.maven.publish") version "0.35.0"
 }
@@ -57,50 +45,41 @@ publishing {
 }
 
 kotlin {
+    explicitApi()
 
-    androidLibrary {
-        namespace = "com.wulinpeng.ezhook"
-        compileSdk = 36
-        minSdk = 26
-        compilerOptions.jvmTarget.set(JvmTarget.valueOf("JVM_${JavaVersion.current().majorVersion}"))
-    }
-
-    androidNativeArm64()
     androidNativeArm32()
-    androidNativeX86()
+    androidNativeArm64()
     androidNativeX64()
+    androidNativeX86()
 
-    // iOS Targets
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
+    iosX64()
 
-    // macOS Target
-    macosX64()
-    macosArm64()
+    js().nodejs()
 
-    // Native Targets
-    tvosArm64()
-    tvosX64()
-    watchosArm64()
-    watchosX64()
+    jvm()
 
-    // Linux Target
+    linuxArm64()
     linuxX64()
 
-    // Windows Target
+    macosArm64()
+    macosX64()
+
     mingwX64()
 
-    jvm("desktop")
-    // JS Target
-    js(IR) {
-        browser()
-        nodejs()
-    }
+    tvosArm64()
+    tvosSimulatorArm64()
+    tvosX64()
 
-    sourceSets {
-        commonMain.dependencies {
-            // put your Multiplatform dependencies here
-        }
-    }
+    wasmJs().nodejs()
+    wasmWasi().nodejs()
+
+    watchosArm32()
+    watchosArm64()
+    watchosDeviceArm64()
+    watchosSimulatorArm64()
+    watchosX64()
+
+    applyDefaultHierarchyTemplate()
 }

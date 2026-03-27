@@ -14,7 +14,7 @@ package com.wulinpeng.ezhook.runtime
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun <T> getField(): T {
+public fun <T> getField(): T {
     throw NotImplementedError("Get field not implemented")
 }
 
@@ -31,7 +31,7 @@ fun <T> getField(): T {
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun setField(value: Any?) {
+public fun setField(value: Any?) {
     throw NotImplementedError("Set field not implemented")
 }
 
@@ -45,7 +45,7 @@ fun setField(value: Any?) {
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun <T> getThisRef(): T {
+public fun <T> getThisRef(): T {
     throw NotImplementedError("Get this ref not implemented")
 }
 
@@ -62,7 +62,7 @@ fun <T> getThisRef(): T {
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun <T> getThisProperty(name: String,isBackingField: Boolean = false): T {
+public fun <T> getThisProperty(name: String,isBackingField: Boolean = false): T {
     throw NotImplementedError("Get this property not implemented")
 }
 
@@ -79,7 +79,7 @@ fun <T> getThisProperty(name: String,isBackingField: Boolean = false): T {
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun setThisProperty(name: String, value: Any?,isBackingField: Boolean = false) {
+public fun setThisProperty(name: String, value: Any?,isBackingField: Boolean = false) {
     throw NotImplementedError("Set this property not implemented")
 }
 
@@ -92,7 +92,7 @@ fun setThisProperty(name: String, value: Any?,isBackingField: Boolean = false) {
  * @author wulinpeng
  * @since 2024/11/21 22:55
  */
-fun <T> callOrigin(): T {
+public fun <T> callOrigin(): T {
     throw NotImplementedError("Call origin not implemented")
 }
 
@@ -107,7 +107,7 @@ fun <T> callOrigin(): T {
  * @author dreammooncai
  * @since 2025/12/27 19:09
  */
-fun <T> callOrigin(
+public fun <T> callOrigin(
     p1: Any?, p2: Any? = null, p3: Any? = null, p4: Any? = null, p5: Any? = null, p6: Any? = null, p7: Any? = null, p8: Any? = null, p9: Any? = null, p10: Any? = null,
     p11: Any? = null, p12: Any? = null, p13: Any? = null, p14: Any? = null, p15: Any? = null, p16: Any? = null, p17: Any? = null, p18: Any? = null, p19: Any? = null,
     p20: Any? = null, p21: Any? = null, p22: Any? = null

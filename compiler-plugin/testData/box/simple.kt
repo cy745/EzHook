@@ -1,10 +1,12 @@
 package foo.bar
 
+import com.wulinpeng.ezhook.runtime.EzHook
+
 object App {
     fun getStr(): String = "app"
 }
 
-@com.wulinpeng.ezhook.runtime.EzHook("foo.bar.App.getStr")
+@EzHook("foo.bar.App.getStr")
 fun getStrOverride(): String {
     return "override"
 }

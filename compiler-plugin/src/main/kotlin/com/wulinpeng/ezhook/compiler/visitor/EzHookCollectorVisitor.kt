@@ -44,7 +44,6 @@ class EzHookCollectorVisitor(val collectInfo: EzHookInfo): IrVisitor<Unit, Nothi
     }
 
     override fun visitModuleFragment(declaration: IrModuleFragment, data: Nothing?) {
-        println("EzHook: visitModuleFragment ${declaration.name}")
         declaration.acceptChildren(this, data)
     }
 

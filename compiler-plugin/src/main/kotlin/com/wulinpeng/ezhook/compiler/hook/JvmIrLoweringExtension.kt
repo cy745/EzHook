@@ -9,11 +9,11 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 /**
  * desc: Hook ir lowering phase to add custom lowering logic
  *
- * @author wulinpeng
- * @since 2024/11/25 22:13
+ * @author qiuqiu
+ * @since 2026/03/28 22:55
  */
-object JsIrLoweringHook {
-    private const val JS_LOWERING_PHASES_CLASS = "org.jetbrains.kotlin.ir.backend.js.JsLoweringPhasesKt"
+object JvmIrLoweringHook {
+    private const val NATIVE_LOWERING_PHASES_CLASS = "org.jetbrains.kotlin.backend.jvm.JvmLoweringPhasesKt"
 
     fun runHook(
         traverser: (CommonBackendContext, IrModuleFragment) -> Unit,
@@ -34,7 +34,7 @@ object JsIrLoweringHook {
         allModules: MutableList<IrModuleFragment>,
         transformer: (CommonBackendContext, IrModuleFragment) -> Unit
     ) {
-        hookLoweringPhase("KlibIrValidationBeforeLoweringPhase") { context, irModuleFragment ->
+        hookLoweringPhase("JvmK1IrValidationBeforeLoweringPhase") { context, irModuleFragment ->
             allModules.add(irModuleFragment)
             transformer(context, irModuleFragment)
         }
@@ -44,7 +44,7 @@ object JsIrLoweringHook {
         onStart: (context: CommonBackendContext) -> Unit
     ) {
         var hasStart = false
-        hookLoweringPhase("JsCodeOutliningLowering") { context, irModuleFragment ->
+        hookLoweringPhase("RepeatedAnnotationLowering") { context, irModuleFragment ->
             if (!hasStart) {
                 onStart(context)
                 hasStart = true
@@ -54,10 +54,10 @@ object JsIrLoweringHook {
 
     @Suppress("UNCHECKED_CAST")
     private fun hookLoweringPhase(phaseName: String, transformer: (CommonBackendContext, IrModuleFragment) -> Unit) {
-        val clazz = Class.forName(JS_LOWERING_PHASES_CLASS)
+        val clazz = Class.forName(NATIVE_LOWERING_PHASES_CLASS)
 
         val lowerListField = clazz.declaredFields
-            .firstOrNull { it.name == "jsLowerings" }
+            .firstOrNull { it.name == "jvmLoweringPhases" }
             ?.apply { isAccessible = true }!!
 
         val lowerList = lowerListField

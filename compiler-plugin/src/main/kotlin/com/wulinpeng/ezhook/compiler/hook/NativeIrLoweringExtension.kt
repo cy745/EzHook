@@ -1,7 +1,6 @@
 package com.wulinpeng.ezhook.compiler.hook
 
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
-import org.jetbrains.kotlin.backend.common.phaser.IrValidationBeforeLoweringPhase
 import org.jetbrains.kotlin.backend.common.phaser.KlibIrValidationBeforeLoweringPhase
 import org.jetbrains.kotlin.config.LoggingContext
 import org.jetbrains.kotlin.ir.declarations.IrFile

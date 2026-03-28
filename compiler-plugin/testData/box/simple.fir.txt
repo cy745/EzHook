@@ -1,0 +1,19 @@
+FILE: simple.kt
+    package foo.bar
+
+    public final object App : R|kotlin/Any| {
+        private constructor(): R|foo/bar/App| {
+            super<R|kotlin/Any|>()
+        }
+
+        public final fun getStr(): R|kotlin/String| {
+            ^getStr String(App)
+        }
+
+    }
+    @R|com/wulinpeng/ezhook/runtime/EzHook|(targetFunctionOrProperty = String(foo.bar.App.getStr)) public final fun getStrOverride(): R|kotlin/String| {
+        ^getStrOverride String(OK)
+    }
+    public final fun box(): R|kotlin/String| {
+        ^box Q|foo/bar/App|.R|foo/bar/App.getStr|()
+    }

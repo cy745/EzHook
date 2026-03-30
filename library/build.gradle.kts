@@ -6,7 +6,7 @@ plugins {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+//    signAllPublications()
     coordinates("io.github.dreammooncai", "ez-hook-library", "0.0.4")
 
     pom {

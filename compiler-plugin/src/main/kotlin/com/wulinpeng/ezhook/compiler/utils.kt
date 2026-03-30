@@ -1,36 +1,17 @@
 package com.wulinpeng.ezhook.compiler
 
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
-import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.ir.InternalSymbolFinderAPI
-import org.jetbrains.kotlin.ir.builders.IrBuilder
-import org.jetbrains.kotlin.ir.builders.IrStatementsBuilder
-import org.jetbrains.kotlin.ir.builders.createTmpVariable
-import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irCallConstructor
-import org.jetbrains.kotlin.ir.builders.irGet
-import org.jetbrains.kotlin.ir.builders.irTemporary
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationBase
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationContainer
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationWithName
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.IrVariable
+import org.jetbrains.kotlin.ir.IrBuiltIns
+import org.jetbrains.kotlin.ir.builders.*
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.addChild
-import org.jetbrains.kotlin.ir.util.constructors
-import org.jetbrains.kotlin.ir.util.deepCopyWithSymbols
-import org.jetbrains.kotlin.ir.util.functions
-import org.jetbrains.kotlin.ir.util.setDeclarationsParent
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -48,12 +29,55 @@ fun IrDeclarationBase.isClassMember(): Boolean {
     return parent is IrClass
 }
 
-inline fun <reified T> T.copyDeclarationToParent(newName: String, newParent: IrDeclarationParent = parent): T where T : IrDeclarationBase, T : IrDeclarationWithName {
+inline fun <reified T> T.copyDeclarationToParent(
+    newName: String,
+    newParent: IrDeclarationParent = parent
+): T where T : IrDeclarationBase, T : IrDeclarationWithName {
     return deepCopyWithSymbols(newParent).apply {
-        name = Name.identifier(newName)
+        // For property accessors (e.g., <get-prop>), the newName contains the <>
+        // which is invalid as a JVM method name. Convert to valid JVM name (e.g., getProp).
+        name = Name.identifier(convertToJvmMethodName(newName))
         setDeclarationsParent(newParent)
+        // Clear correspondingPropertySymbol to avoid "orphaned getter/setter" IR validation error.
+        // The copied function is no longer part of the original property.
+        (this as? IrSimpleFunction)?.correspondingPropertySymbol = null
         (newParent as IrDeclarationContainer).addChild(this)
     }
+}
+
+/**
+ * Converts Kotlin IR property accessor names to valid JVM method names.
+ * Handles both bare accessors (<get-prop>) and those with suffixes (<get-prop>_function_ez_hook).
+ * Examples:
+ *   <get-prop> -> getProp
+ *   <get-prop>_function_ez_hook -> getProp_function_ez_hook
+ *   <set-name> -> setName
+ *   <is-active> -> isActive
+ */
+fun convertToJvmMethodName(name: String): String {
+    // Check if it starts with a property accessor prefix (with optional suffix after the closing >)
+    // The pattern is: <get/set/is-xxx> optionally followed by suffix
+    if (name.startsWith("<")) {
+        val endOfAccessor = name.indexOf('>')
+        if (endOfAccessor > 0) {
+            val accessorPart = name.substring(0, endOfAccessor + 1) // e.g., "<get-prop>"
+            val suffix = name.substring(endOfAccessor + 1) // e.g., "_function_ez_hook"
+
+            val content = accessorPart.substring(1, accessorPart.length - 1) // Remove < and >
+            val converted = when {
+                content.startsWith("get-") -> "get" + capitalize(content.substring(4))
+                content.startsWith("set-") -> "set" + capitalize(content.substring(4))
+                content.startsWith("is-") -> "is" + capitalize(content.substring(3))
+                else -> accessorPart // Fallback: keep original accessor part
+            }
+            return converted + suffix
+        }
+    }
+    return name
+}
+
+private fun capitalize(str: String): String {
+    return if (str.isEmpty()) str else str[0].uppercaseChar() + str.substring(1)
 }
 
 @OptIn(InternalSymbolFinderAPI::class, UnsafeDuringIrConstructionAPI::class)

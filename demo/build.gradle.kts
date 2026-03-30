@@ -1,15 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("../local-plugin-repository")
-    }
-    google()
-    gradlePluginPortal()
-}
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     id("io.github.dreammooncai.ez-hook-gradle-plugin")
@@ -26,6 +14,8 @@ kotlin {
             isStatic = true
         }
     }
+
+    jvm("desktop")
 
     js(IR) {
         nodejs()

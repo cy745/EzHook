@@ -139,7 +139,7 @@ fun Test.setLibraryProperty(propName: String, jarName: String) {
 mavenPublishing {
     publishToMavenCentral()
 //    signAllPublications()
-    coordinates("io.github.dreammooncai", "ez-hook-compiler-plugin", "0.0.5")
+    coordinates("io.github.dreammooncai", "ez-hook-compiler-plugin", "0.0.5-test")
 
     pom {
         name.set("EzHook")

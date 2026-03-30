@@ -1,58 +1,20 @@
 package com.wulinpeng.ezhook.compiler.visitor
 
-import com.wulinpeng.ezhook.compiler.EzHookInfo
-import com.wulinpeng.ezhook.compiler.copyDeclarationToParent
-import com.wulinpeng.ezhook.compiler.createPair
-import com.wulinpeng.ezhook.compiler.getPairFirst
-import com.wulinpeng.ezhook.compiler.getPairSecond
-import com.wulinpeng.ezhook.compiler.getPairType
+import com.wulinpeng.ezhook.compiler.*
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
+import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
+import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.builders.IrBuilder
-import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
-import org.jetbrains.kotlin.ir.builders.createTmpVariable
+import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
-import org.jetbrains.kotlin.ir.builders.irBlock
-import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.builders.irExprBody
-import org.jetbrains.kotlin.ir.builders.irGet
-import org.jetbrains.kotlin.ir.builders.irGetField
-import org.jetbrains.kotlin.ir.builders.irNull
-import org.jetbrains.kotlin.ir.builders.irReturn
-import org.jetbrains.kotlin.ir.builders.irSet
-import org.jetbrains.kotlin.ir.builders.irSetField
-import org.jetbrains.kotlin.ir.builders.irTemporary
-import org.jetbrains.kotlin.ir.builders.irUnit
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationBase
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrField
-import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.IrValueParameter
-import org.jetbrains.kotlin.ir.declarations.IrVariable
-import org.jetbrains.kotlin.ir.expressions.IrCall
-import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
-import org.jetbrains.kotlin.ir.expressions.IrGetField
-import org.jetbrains.kotlin.ir.expressions.IrGetValue
-import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
-import org.jetbrains.kotlin.ir.expressions.IrReturn
-import org.jetbrains.kotlin.ir.expressions.IrSetField
+import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.getClass
-import org.jetbrains.kotlin.ir.util.constructedClass
-import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
-import org.jetbrains.kotlin.ir.util.getAllSuperclasses
-import org.jetbrains.kotlin.ir.util.kotlinFqName
-import org.jetbrains.kotlin.ir.util.properties
-import org.jetbrains.kotlin.ir.util.statements
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.Name
 
@@ -100,7 +62,8 @@ class EzHookIrTransformer(val collectInfos: EzHookInfo, val pluginContext: Commo
                     val hookField = hookProperty.backingField!!
                     targetField.initializer = pluginContext.createIrBuilder(targetField.symbol).run {
                         hookField.initializer?.expression?.let { expr ->
-                            irExprBody(expr)
+                            // Deep copy to avoid sharing the same IR node with the hook field's initializer
+                            irExprBody(expr.deepCopyWithSymbols(targetField))
                         }
                     }
                 } else if (hookInfo.isNull)
@@ -143,7 +106,10 @@ class EzHookIrTransformer(val collectInfos: EzHookInfo, val pluginContext: Commo
                             if (targetInitializer == null) {
                                 println("EzHook: callOrigin cannot be executed because there is no field behind it")
                                 super.visitCall(expression)
-                            } else targetInitializer
+                            } else {
+                                // Deep copy to avoid sharing the same IR node with targetField's initializer
+                                targetInitializer.deepCopyWithSymbols()
+                            }
                         }
 
                         GET_THIS_REF -> {

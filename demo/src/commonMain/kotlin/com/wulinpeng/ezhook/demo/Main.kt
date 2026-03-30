@@ -15,27 +15,29 @@ import kotlin.experimental.ExperimentalNativeApi
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
+import com.wulinpeng.ezhook.runtime.callOrigin
+import com.wulinpeng.ezhook.runtime.setField
+import com.wulinpeng.ezhook.runtime.getField
+
+object App {
+    private val prop: String = "App"
+    fun getStr(): String = prop
+}
+
+//@EzHook("foo.bar.App.getStr")
+//fun getStrOverride(): String {
+//    return "OK"
+//}
+
+fun box(): String {
+    return App.getStr()
+}
+
+@EzHook("com.wulinpeng.ezhook.demo.App.prop")
+public val newProp: String = "OK"
+
 @OptIn(ExperimentalNativeApi::class)
 fun main() {
-    val test = NormalTest("origin name")
-    testCase("NormalCase", test.test("origin name"))
-    testCase("TopLevelCase", topLevelFunctionTest("origin name"))
-    testCase("ExtendFunctionCase", 10.getStr())
-    testCase("DurationHook", "${Duration.ZERO.toInt(DurationUnit.SECONDS)}")
-
-    testCase("TopLevelCase2", topLevelPropertyTest)
-    topLevelPropertyTest = "100"
-    testCase("TopLevelCase2", topLevelPropertyTest)
-
-    testCase("NormalCase2",test.testProperty)
-    test.testProperty = "200"
-    testCase("NormalCase2",test.testProperty)
-
-    testCase("NormalCase3",test.testReParam("origin name",18))
-
-    testCase("NormalCase4",test.testLazy)
+    println(box())
 }
 
-fun testCase(caseName: String, result: String) {
-    println("Test case $caseName: $result")
-}

@@ -71,13 +71,13 @@ object JvmIrLoweringHook {
             .apply { isAccessible = true }
 
         val originPass = passField.get(lower)
-//        if (!originPass.javaClass.name.startsWith("org.jetbrains.kotlin.ir.backend.js.JsLoweringPhasesKt\$jsLowerings\$1")) {
-//            // already hooked
-//            return
-//        }
+        if (originPass.javaClass.name.startsWith("com.wulinpeng.ezhook.compiler.hook")) {
+            // already hooked
+            return
+        }
 
-        val newPass: (CommonBackendContext) -> OverrideLoweringPass = { context: CommonBackendContext ->
-            object : OverrideLoweringPass() {
+        val newPass: (CommonBackendContext) -> ModuleLoweringPass = { context: CommonBackendContext ->
+            object : ModuleLoweringPass {
                 val originPass = (originPass as (CommonBackendContext) -> ModuleLoweringPass).invoke(context)
                 override fun lower(irModule: IrModuleFragment) {
                     transformer(context, irModule)
@@ -88,6 +88,4 @@ object JvmIrLoweringHook {
 
         passField.set(lower, newPass)
     }
-
-    abstract class OverrideLoweringPass : ModuleLoweringPass
 }

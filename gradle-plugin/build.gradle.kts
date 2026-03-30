@@ -1,9 +1,6 @@
-
 plugins {
     id("java-gradle-plugin")
-    `maven-publish`
     kotlin("jvm")
-    kotlin("kapt")
     id("com.vanniktech.maven.publish") version "0.35.0"
 }
 
@@ -19,7 +16,7 @@ dependencies {
 mavenPublishing {
     publishToMavenCentral()
 //    signAllPublications()
-    coordinates("io.github.dreammooncai", "ez-hook-gradle-plugin", "0.0.5")
+    coordinates("io.github.dreammooncai", "ez-hook-gradle-plugin", "0.0.5-test")
 
     pom {
         name.set("EzHook")
@@ -43,15 +40,6 @@ mavenPublishing {
             url.set("https://github.com/DreamMoonCai/EzHook")
             connection.set("scm:git:git://github.com/DreamMoonCai/EzHook.git")
             developerConnection.set("scm:git:ssh://git@github.com/DreamMoonCai/EzHook.git")
-        }
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "localPluginRepository"
-            url = uri("../local-plugin-repository")
         }
     }
 }
